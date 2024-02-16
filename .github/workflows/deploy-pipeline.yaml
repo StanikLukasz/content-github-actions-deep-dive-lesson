@@ -1,6 +1,10 @@
 name: Deploy Lambda Function
 on: [push]
 
+env:
+  ARTIFACT_NAME: zipped-bundle
+  ARTIFACT_FILE_NAME: ${{ github.sha }}.zip
+
 jobs:
 
   lint:
@@ -38,17 +42,19 @@ jobs:
       - name: Zip bundle
         run: |
             cd function
-            zip -r ../${{ github.sha }}.zip .
+            zip -r ${{ env.ARTIFACT_FILE_NAME }} .
       - name: Archive artifact
         uses: actions/upload-artifact@v2
         with:
-          name: zipped-bundle
-          path: ${{ github.sha }}.zip
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_FILE_NAME }}
 
   publish:
     runs-on: ubuntu-latest
+    needs: build
     steps:
     - name: create a release
+      id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.github_token }}
@@ -58,3 +64,17 @@ jobs:
         body: commit hash ${{ github.sha }}
         draft: false
         prerelease: false
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ env.ARTIFACT_NAME }}
+    - name: Upload artifact to release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.github_token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${{ env.ARTIFACT_FILE_NAME }}
+        asset_name: code_with_libs.zip
+        asset_content_type: application/zip
+      

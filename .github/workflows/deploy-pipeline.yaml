@@ -62,4 +62,5 @@ jobs:
       with:
         artifacts: ${{ env.ARTIFACT_FILE_NAME }}
         commit: ${{ github.sha }}
+        tag: ${{ github.job_number }}
       

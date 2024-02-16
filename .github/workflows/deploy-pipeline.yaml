@@ -53,28 +53,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-    - name: create a release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.github_token }}
-      with:
-        tag_name: ${{ github.run_number }}
-        release_name: Release no ${{ github.run_number }}
-        body: commit hash ${{ github.sha }}
-        draft: false
-        prerelease: false
     - name: Download artifact
       uses: actions/download-artifact@v2
       with:
         name: ${{ env.ARTIFACT_NAME }}
     - name: Upload artifact to release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.github_token }}
+      uses: ncipollo/release-action@v1
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.ARTIFACT_FILE_NAME }}
-        asset_name: code_with_libs.zip
-        asset_content_type: application/zip
+        artifacts: ${{ env.ARTIFACT_FILE_NAME }}
       

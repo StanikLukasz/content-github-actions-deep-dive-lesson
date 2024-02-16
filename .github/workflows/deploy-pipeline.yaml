@@ -42,7 +42,7 @@ jobs:
       - name: Zip bundle
         run: |
             cd function
-            zip -r ${{ env.ARTIFACT_FILE_NAME }} .
+            zip -r ../${{ env.ARTIFACT_FILE_NAME }} .
       - name: Archive artifact
         uses: actions/upload-artifact@v2
         with:
